@@ -1,11 +1,20 @@
-const express = require('express')
-const path = require('path')
+const express = require('express');
+const axios = require('axios');
+const app = express();
+const port = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 5001
+app.get('/:id', async (req, res) => {
+    const id = req.params.id;
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbyHe5Q7ffoMXtsqxxrBcPHBTP-Sw-NrH3P3WTObYHvd3bNk1UiyiDYwtEMjwGOEmVFPfg/exec';
 
-express()
-  .use(express.static(path.join(__dirname, 'public')))
-  .set('views', path.join(__dirname, 'views'))
-  .set('view engine', 'ejs')
-  .get('/', (req, res) => res.render('pages/index'))
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+    try {
+        const response = await axios.post(scriptUrl, new URLSearchParams({ id: id }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+        res.send(`Sent user ID ${id} to Google Apps Script. Response: ${response.data}`);
+    } catch (error) {
+        res.send(`Error sending user ID ${id} to Google Apps Script: ${error}`);
+    }
+});
+
+app.listen(port, () => {
+    console.log(`App listening at http://api.mesmun.org:${port}`);
+});
